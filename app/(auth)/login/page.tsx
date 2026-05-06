@@ -1,25 +1,11 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [emailSent, setEmailSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  async function handleEmailSignIn(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    await signIn("resend", { email, callbackUrl: "/" });
-    setEmailSent(true);
-    setLoading(false);
-  }
-
   return (
     <main className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="mb-12">
           <span className="font-mono text-accent text-xs tracking-[0.3em] uppercase">
             CVMatch
@@ -31,56 +17,13 @@ export default function LoginPage() {
           </h1>
         </div>
 
-        {emailSent ? (
-          <div className="border border-border p-6">
-            <p className="font-mono text-xs text-accent uppercase tracking-widest mb-2">
-              Check your inbox
-            </p>
-            <p className="text-sm text-muted">
-              We sent a magic link to{" "}
-              <span className="text-[#e8e8e8]">{email}</span>. Click it to sign
-              in.
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* Google */}
-            <button
-              onClick={() => signIn("google", { callbackUrl: "/" })}
-              className="w-full flex items-center justify-center gap-3 border border-border px-4 py-3 text-sm font-mono hover:border-accent hover:text-accent transition-colors duration-150 mb-4"
-            >
-              <GoogleIcon />
-              Continue with Google
-            </button>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px bg-border" />
-              <span className="font-mono text-2xs text-muted uppercase tracking-widest">
-                or
-              </span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            {/* Email */}
-            <form onSubmit={handleEmailSignIn} className="space-y-3">
-              <input
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full bg-surface border border-border px-4 py-3 font-mono text-sm text-[#e8e8e8] placeholder:text-muted focus:outline-none focus:border-accent transition-colors"
-              />
-              <button
-                type="submit"
-                disabled={loading || !email}
-                className="w-full bg-accent text-background px-4 py-3 font-mono text-sm font-medium uppercase tracking-wider hover:bg-[#d4f570] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {loading ? "Sending..." : "Send magic link"}
-              </button>
-            </form>
-          </>
-        )}
+        <button
+          onClick={() => signIn("google", { callbackUrl: "/" })}
+          className="w-full flex items-center justify-center gap-3 border border-border px-4 py-3 text-sm font-mono hover:border-accent hover:text-accent transition-colors duration-150"
+        >
+          <GoogleIcon />
+          Continue with Google
+        </button>
 
         <p className="mt-8 font-mono text-2xs text-muted text-center">
           By signing in you agree to our terms of service.
