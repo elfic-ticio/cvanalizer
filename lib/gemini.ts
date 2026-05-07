@@ -15,7 +15,7 @@ export async function analyzeCV(
   jobDescription: string
 ): Promise<AnalysisResult> {
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-1.5-flash",
     generationConfig: {
       responseMimeType: "application/json",
     },
