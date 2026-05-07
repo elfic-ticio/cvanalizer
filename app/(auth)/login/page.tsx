@@ -24,9 +24,9 @@ export default function LoginPage() {
             CVMatch
           </span>
           <h1 className="font-sans text-3xl font-bold mt-2 text-[#e8e8e8] leading-tight">
-            Analyze your CV
+            Sube tu CV. Pega la oferta.
             <br />
-            <span className="text-muted">with precision.</span>
+            <span className="text-muted">Descubre qué te falta.</span>
           </h1>
         </div>
 
