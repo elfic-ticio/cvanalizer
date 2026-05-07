@@ -98,14 +98,9 @@ export function AnalysisHistory({ analyses }: { analyses: Analysis[] }) {
                   </div>
                 )}
 
-                <a
-                  href={analysis.cvUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono text-xs text-muted hover:text-accent transition-colors inline-block"
-                >
-                  View original PDF →
-                </a>
+                <span className="font-mono text-xs text-muted">
+                  {analysis.cvUrl}
+                </span>
               </div>
             )}
           </div>
