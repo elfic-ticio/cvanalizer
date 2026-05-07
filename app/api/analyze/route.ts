@@ -26,7 +26,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const pdfResponse = await fetch(cvUrl);
+  const pdfResponse = await fetch(cvUrl, {
+    headers: {
+      Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
+    },
+  });
   if (!pdfResponse.ok) {
     return NextResponse.json(
       { error: "Failed to fetch PDF from storage" },

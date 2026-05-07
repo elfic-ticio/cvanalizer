@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const blob = await put(filename, file, {
-      access: "public",
+      access: "private",
       contentType: "application/pdf",
     });
     return NextResponse.json({ url: blob.url });
