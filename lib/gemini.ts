@@ -10,7 +10,7 @@ export interface AnalysisResult {
   summary: string;
 }
 
-const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-001"];
+const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-001", "gemini-1.5-flash"];
 
 const PROMPT = (cvText: string, jobDescription: string) => `\
 Eres un experto en reclutamiento técnico. Analiza la compatibilidad entre este CV y esta oferta de trabajo.
@@ -59,7 +59,13 @@ export async function analyzeCV(
       return await tryModel(modelName, cvText, jobDescription);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      const isRetryable = message.includes("503") || message.includes("overloaded") || message.includes("high demand");
+      const isRetryable =
+        message.includes("503") ||
+        message.includes("overloaded") ||
+        message.includes("high demand") ||
+        message.includes("429") ||
+        message.includes("quota") ||
+        message.includes("Too Many Requests");
       lastError = err instanceof Error ? err : new Error(message);
 
       if (isRetryable) {
