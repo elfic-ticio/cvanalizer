@@ -4,6 +4,8 @@ import { extractTextFromPDF } from "@/lib/pdf";
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();

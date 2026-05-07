@@ -15,10 +15,13 @@ export async function analyzeCV(
   jobDescription: string
 ): Promise<AnalysisResult> {
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     generationConfig: {
       responseMimeType: "application/json",
+      temperature: 0.3,
     },
+    // @ts-expect-error thinkingConfig is supported in 0.24+ but not yet in types
+    thinkingConfig: { thinkingBudget: 0 },
   });
 
   const prompt = `Eres un experto en reclutamiento técnico. Analiza la compatibilidad entre este CV y esta oferta de trabajo.
@@ -31,7 +34,7 @@ ${jobDescription}
 
 Responde SOLO en JSON con esta estructura exacta, sin texto adicional:
 {
-  "score": number (0-100),
+  "score": number entre 0 y 100,
   "matchSkills": string[],
   "missingSkills": string[],
   "suggestions": [string, string, string],
@@ -40,5 +43,11 @@ Responde SOLO en JSON con esta estructura exacta, sin texto adicional:
 
   const result = await model.generateContent(prompt);
   const text = result.response.text();
-  return JSON.parse(text) as AnalysisResult;
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error("Gemini did not return valid JSON");
+  }
+
+  return JSON.parse(jsonMatch[0]) as AnalysisResult;
 }
