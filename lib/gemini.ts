@@ -10,21 +10,10 @@ export interface AnalysisResult {
   summary: string;
 }
 
-export async function analyzeCV(
-  cvText: string,
-  jobDescription: string
-): Promise<AnalysisResult> {
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.3,
-    },
-    // @ts-expect-error thinkingConfig is supported in 0.24+ but not yet in types
-    thinkingConfig: { thinkingBudget: 0 },
-  });
+const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-001"];
 
-  const prompt = `Eres un experto en reclutamiento técnico. Analiza la compatibilidad entre este CV y esta oferta de trabajo.
+const PROMPT = (cvText: string, jobDescription: string) => `\
+Eres un experto en reclutamiento técnico. Analiza la compatibilidad entre este CV y esta oferta de trabajo.
 
 CV:
 ${cvText}
@@ -41,13 +30,45 @@ Responde SOLO en JSON con esta estructura exacta, sin texto adicional:
   "summary": "máximo 2 oraciones"
 }`;
 
-  const result = await model.generateContent(prompt);
+async function tryModel(modelName: string, cvText: string, jobDescription: string): Promise<AnalysisResult> {
+  const model = genAI.getGenerativeModel({
+    model: modelName,
+    generationConfig: {
+      responseMimeType: "application/json",
+      temperature: 0.3,
+    },
+  });
+
+  const result = await model.generateContent(PROMPT(cvText, jobDescription));
   const text = result.response.text();
 
   const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error("Gemini did not return valid JSON");
-  }
+  if (!jsonMatch) throw new Error("Gemini did not return valid JSON");
 
   return JSON.parse(jsonMatch[0]) as AnalysisResult;
+}
+
+export async function analyzeCV(
+  cvText: string,
+  jobDescription: string
+): Promise<AnalysisResult> {
+  let lastError: Error = new Error("No models available");
+
+  for (const modelName of MODELS) {
+    try {
+      return await tryModel(modelName, cvText, jobDescription);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const isRetryable = message.includes("503") || message.includes("overloaded") || message.includes("high demand");
+      lastError = err instanceof Error ? err : new Error(message);
+
+      if (isRetryable) {
+        console.warn(`[gemini] ${modelName} unavailable, trying next model...`);
+        continue;
+      }
+      throw lastError;
+    }
+  }
+
+  throw lastError;
 }
