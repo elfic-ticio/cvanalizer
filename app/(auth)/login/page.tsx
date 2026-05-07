@@ -1,8 +1,21 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { useState } from "react";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function handleEmailSignIn(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    await signIn("resend", { email, redirect: false, callbackUrl: "/" });
+    setSent(true);
+    setLoading(false);
+  }
+
   return (
     <main className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
@@ -24,6 +37,39 @@ export default function LoginPage() {
           <GoogleIcon />
           Continue with Google
         </button>
+
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-border" />
+          <span className="font-mono text-2xs text-muted uppercase tracking-widest">or</span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        {sent ? (
+          <div className="border border-accent px-4 py-5 text-center">
+            <p className="font-mono text-accent text-xs tracking-widest uppercase mb-2">Check your inbox</p>
+            <p className="font-mono text-muted text-xs">
+              We sent a sign-in link to <span className="text-[#e8e8e8]">{email}</span>
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleEmailSignIn} className="flex flex-col gap-3">
+            <input
+              type="email"
+              required
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-transparent border border-border px-4 py-3 text-sm font-mono text-[#e8e8e8] placeholder-muted focus:outline-none focus:border-accent transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full border border-border px-4 py-3 text-sm font-mono hover:border-accent hover:text-accent transition-colors duration-150 disabled:opacity-40"
+            >
+              {loading ? "Sending..." : "Send magic link"}
+            </button>
+          </form>
+        )}
 
         <p className="mt-8 font-mono text-2xs text-muted text-center">
           By signing in you agree to our terms of service.
