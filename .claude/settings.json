@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(openssl rand *)",
+      "Bash(npx prisma *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(del \"c:\\\\Users\\\\omarj\\\\cvanalizer\\\\app\\\\api\\\\upload\\\\route.ts\")"
+    ]
+  }
+}
