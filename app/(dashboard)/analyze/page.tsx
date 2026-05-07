@@ -47,21 +47,14 @@ export default function AnalyzePage() {
       setStep("uploading");
       const formData = new FormData();
       formData.append("file", file);
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (!uploadRes.ok) {
-        const data = await uploadRes.json() as { error: string };
-        throw new Error(data.error ?? "Upload failed");
-      }
-      const { url } = await uploadRes.json() as { url: string };
+      formData.append("jobTitle", jobTitle);
+      formData.append("jobDescription", jobDescription);
+      if (company) formData.append("company", company);
 
       setStep("analyzing");
       const analyzeRes = await fetch("/api/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cvUrl: url, jobDescription, jobTitle, company }),
+        body: formData,
       });
       if (!analyzeRes.ok) {
         const data = await analyzeRes.json() as { error: string };

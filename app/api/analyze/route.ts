@@ -10,35 +10,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json() as {
-    cvUrl: string;
-    jobDescription: string;
-    jobTitle: string;
-    company?: string;
-  };
+  const formData = await req.formData();
+  const file = formData.get("file") as File | null;
+  const jobTitle = formData.get("jobTitle") as string | null;
+  const company = formData.get("company") as string | null;
+  const jobDescription = formData.get("jobDescription") as string | null;
 
-  const { cvUrl, jobDescription, jobTitle, company } = body;
-
-  if (!cvUrl || !jobDescription || !jobTitle) {
+  if (!file || !jobTitle || !jobDescription) {
     return NextResponse.json(
-      { error: "cvUrl, jobDescription, and jobTitle are required" },
+      { error: "file, jobTitle, and jobDescription are required" },
       { status: 400 }
     );
   }
 
-  const pdfResponse = await fetch(cvUrl, {
-    headers: {
-      Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
-    },
-  });
-  if (!pdfResponse.ok) {
-    return NextResponse.json(
-      { error: "Failed to fetch PDF from storage" },
-      { status: 400 }
-    );
+  if (file.type !== "application/pdf") {
+    return NextResponse.json({ error: "Only PDF files are accepted" }, { status: 400 });
   }
 
-  const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+  if (file.size > 10 * 1024 * 1024) {
+    return NextResponse.json({ error: "File size exceeds 10MB limit" }, { status: 400 });
+  }
+
+  const pdfBuffer = Buffer.from(await file.arrayBuffer());
   const cvText = await extractTextFromPDF(pdfBuffer);
 
   if (!cvText || cvText.length < 50) {
@@ -54,7 +47,7 @@ export async function POST(req: NextRequest) {
     data: {
       userId: session.user.id,
       score: result.score,
-      cvUrl,
+      cvUrl: file.name,
       jobTitle,
       company: company ?? null,
       matchSkills: result.matchSkills,
