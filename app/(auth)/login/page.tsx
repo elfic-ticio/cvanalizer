@@ -24,7 +24,7 @@ export default function LoginPage() {
             CVMatch
           </span>
           <h1 className="font-sans text-3xl font-bold mt-2 text-[#e8e8e8] leading-tight">
-            Sube tu CV. Pega la oferta.
+            Upload your CV. Paste the job posting.
             <br />
             <span className="text-muted">Descubre qué te falta.</span>
           </h1>
