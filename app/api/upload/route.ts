@@ -31,10 +31,14 @@ export async function POST(req: NextRequest) {
 
   const filename = `cvs/${session.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
 
-  const blob = await put(filename, file, {
-    access: "public",
-    contentType: "application/pdf",
-  });
-
-  return NextResponse.json({ url: blob.url });
+  try {
+    const blob = await put(filename, file, {
+      access: "public",
+      contentType: "application/pdf",
+    });
+    return NextResponse.json({ url: blob.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Storage error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
